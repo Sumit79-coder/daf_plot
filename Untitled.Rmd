@@ -1,0 +1,542 @@
+---
+title: "DAF"
+author: "Sumit"
+date: "2023-06-29"
+output: html_document
+---
+
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(dplyr)
+library(openxlsx)
+```
+
+
+
+```{r}
+data <- read_excel("/Users/sumitkumargupta/Desktop/Dal /DAF/data_1.xlsx")
+```
+
+
+
+
+```{r}
+location <- data[ , 3]
+chem_prop <- data[, 4:25]
+```
+
+
+Round off all numerical values to 3 digit. 
+
+
+```{r}
+
+library(dplyr)
+
+
+chem_prop_1 <- chem_prop %>%
+  mutate_all(~ ifelse(is.na(as.numeric(.)), ., format(round(as.numeric(.), 3), nsmall = 2)))
+
+print(df)
+
+```
+
+
+
+
+```{r}
+
+chem_prop_2 <- cbind(location, chem_prop_1)
+df <- chem_prop_2
+
+```
+
+
+```{r}
+plot(df)
+```
+
+
+Removing Columns That are not temporarily useful. 
+
+
+```{r}
+chem_prop_3 <- chem_prop_2 %>%
+  select(-`pH (SCADA)`, -`Mn (HW Lab)`, -`Fe (benchtop)`, -`Al            (benchtop)`, -`Filter Head Loss (ft)`, -`Filter Feed (gpm)`, -`TOC @ CWRS`, -`DOC @ CWRS`, -`Filter 1 Media`, -`Alkalinity (HW Lab)` , -`Filter Run Times (hrs)`, -`Coagulant Type`, -`Filter 2 Media`)
+
+
+
+
+```
+
+
+
+
+```{r}
+plot(chem_prop_3)
+```
+
+
+
+```{r}
+
+valid_rows <- complete.cases(chem_prop_3$`UVT (benchtop)`)
+filtered_data <- chem_prop_3[valid_rows, ]
+
+```
+
+
+
+
+```{r}
+library(ggplot2)
+
+data_UVT <- filtered_data[filtered_data$`Sample Location` %in% c('Raw', 'DAF', 'F1', 'F2'), ]
+
+data_UVT$`Sample Location` <- factor(data_UVT$`Sample Location`, levels = c('Raw', 'DAF', 'F1', 'F2'))
+
+data_UVT$`UVT (benchtop)` <- as.numeric(data_UVT$`UVT (benchtop)`)
+
+ggplot(data_UVT, aes(x = `Sample Location`, y = `UVT (benchtop)`)) +
+  geom_boxplot() +
+  labs(x = 'Sample Location', y = 'UVT (benchtop)',
+       title = 'Boxplot of UVT by Raw, DAF, F1 and F2')
+
+```
+
+
+
+
+
+Replace "-" sign with NA. 
+
+
+
+
+```{r}
+# Loop through each column
+for (col in colnames(chem_prop_3)) {
+  chem_prop_3[col][chem_prop_3[col] == "-"] <- NA
+}
+
+```
+
+
+
+```{r}
+valid_rows1 <- complete.cases(chem_prop_3$`Turbidity (benchtop)`)
+filtered_data1 <- chem_prop_3[valid_rows1, ]
+```
+
+
+
+```{r}
+library(ggplot2)
+
+data_Turbidity <- filtered_data1[filtered_data1$`Sample Location` %in% c('Raw', 'DAF', 'F1', 'F2'), ]
+
+data_Turbidity$`Sample Location` <- factor(data_Turbidity$`Sample Location`, levels = c('Raw', 'DAF', 'F1', 'F2'))
+
+data_Turbidity$`Turbidity (benchtop)` <- as.numeric(data_Turbidity$`Turbidity (benchtop)`)
+
+ggplot(data_Turbidity, aes(x = `Sample Location`, y = `Turbidity (benchtop)`)) +
+  geom_boxplot() +
+  labs(x = 'Sample Location', y = 'Turbidity (benchtop)',
+       title = 'Boxplot of Turbidity by Raw, DAF, F1 and F2')
+
+
+```
+
+
+
+```{r}
+data_Turbidity$`Turbidity (benchtop)` <- as.numeric(data_Turbidity$`Turbidity (benchtop)`)
+
+ggplot(data_Turbidity, aes(x = `Sample Location`, y = `Turbidity (benchtop)`)) +
+  geom_boxplot(color = "darkblue", fill = "lightblue", outlier.color = "red", outlier.shape = 16, outlier.size = 3) +
+  labs(x = 'Sample Location', y = 'Turbidity (benchtop)', title = 'Boxplot of Turbidity (benchtop) by Raw, DAF, F1 and F2') +
+  theme_minimal() +
+  theme(plot.title = element_text(color = "darkblue", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "darkblue", size = 12, face = "bold"),
+        axis.title.y = element_text(color = "darkblue", size = 12, face = "bold"),
+        axis.text = element_text(color = "darkblue", size = 10),
+        legend.position = "none")
+
+```
+
+
+
+
+
+
+```{r}
+valid_rows2 <- complete.cases(chem_prop_3$`pH (benchtop)`)
+filtered_data2 <- chem_prop_3[valid_rows2, ]
+```
+
+
+
+```{r}
+library(ggplot2)
+
+data_pH <- filtered_data2[filtered_data2$`Sample Location` %in% c('Raw', 'DAF', 'F1', 'F2'), ]
+
+data_pH$`pH (benchtop)`[126] <- 5.83
+
+data_pH$`Sample Location` <- factor(data_pH$`Sample Location`, levels = c('Raw', 'DAF', 'F1', 'F2'))
+
+data_pH$`pH (benchtop)` <- as.numeric(data_pH$`pH (benchtop)`)
+
+ggplot(data_pH, aes(x = `Sample Location`, y = `pH (benchtop)`)) +
+  geom_boxplot() +
+  labs(x = 'Sample Location', y = 'pH (benchtop)',
+       title = 'Boxplot of pH (benchtop) by Raw, DAF, F1 and F2')
+
+
+```
+
+
+
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Your data processing code...
+
+ggplot(data_pH, aes(x = `Sample Location`, y = `pH (benchtop)`)) +
+  geom_boxplot(color = "darkblue", fill = "lightblue", outlier.color = "red", outlier.shape = 16, outlier.size = 3) +
+  labs(x = 'Sample Location', y = 'pH (benchtop)', title = 'Boxplot of pH (benchtop) by Raw, DAF, F1 and F2') +
+  theme_minimal() +
+  theme(plot.title = element_text(color = "darkblue", size = 14, face = "bold"),
+        axis.title.x = element_text(color = "darkblue", size = 12, face = "bold"),
+        axis.title.y = element_text(color = "darkblue", size = 12, face = "bold"),
+        axis.text = element_text(color = "darkblue", size = 10),
+        legend.position = "none")
+
+```
+
+
+
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(ggplot2)
+
+# Assuming your data frame is named "df"
+df$`Turbidity (benchtop)` <- as.numeric(df$`Turbidity (benchtop)`)
+
+ggplot(df, aes(x = `Floc Time`, y = `Turbidity (benchtop)`, color = `Alum Dose (mg/L)`)) +
+  geom_line() +
+  labs(x = "Floc Time", y = "Turbidity", color = "Alum Dose") +
+  theme_minimal()
+
+
+```
+
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Assuming your data frame is named "df"
+ggplot(df, aes(x = `Floc Time`, y = `Turbidity (benchtop)`, color = `Alum Dose (mg/L)`)) +
+  geom_point() +
+  labs(x = "Floc Time", y = "Alum Dose", color = "Turbidity") +
+  theme_minimal()
+
+```
+
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Assuming your data frame is named "df"
+ggplot(df, aes(x = `Sample Location`, y = `Turbidity (benchtop)`)) +
+  geom_boxplot() +
+  labs(x = "Sample Location", y = "Turbidity") +
+  theme_minimal()
+
+```
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Assuming your data frame is named "df"
+ggplot(df, aes(x = `Sample Location`, y = `Turbidity (benchtop)`)) +
+  stat_summary(fun = mean, geom = "bar") +
+  labs(x = "Sample Location", y = "Mean Turbidity") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+ggplot(
+  data = chem_prop_3,
+  mapping = aes(x = `Turbidity (benchtop)` , y = `Alum Dose (mg/L)`, color = `Floc Time`)
+) +
+  geom_point()
+```
+
+
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+filtered_data <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+filtered_data$`Turbidity (benchtop)` <- as.numeric(filtered_data$`Turbidity (benchtop)`)
+filtered_data$`Alum Dose (mg/L)` <- as.numeric(filtered_data$`Alum Dose (mg/L)`)
+
+ggplot(
+  data = filtered_data,
+  mapping = aes(x = `Turbidity (benchtop)`, y = `Alum Dose (mg/L)`, color = factor(`Floc Time`))
+) +
+  geom_point()
+
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+filtered_data <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+filtered_data$`UVT (benchtop)` <- as.numeric(filtered_data$`UVT (benchtop)`)
+filtered_data$`Alum Dose (mg/L)` <- as.numeric(filtered_data$`Alum Dose (mg/L)`)
+
+ggplot(
+  data = filtered_data,
+  mapping = aes(x = `UVT (benchtop)`, y = `Alum Dose (mg/L)`, color = factor(`Floc Time`))
+) +
+  geom_point()
+
+```
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+chem_prop_3$`UVT (benchtop)` <- as.numeric(chem_prop_3$`UVT (benchtop)`)
+chem_prop_3$`Turbidity (benchtop)` <- as.numeric(chem_prop_3$`Turbidity (benchtop)`)
+
+ggplot(
+  data = chem_prop_3,
+  mapping = aes(x = `Turbidity (benchtop)` , y = `Alum Dose (mg/L)`, color = `Sample Location`)
+) +
+  geom_point()
+```
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+chem_prop_3$`Sample Location`[335] <- "Raw"
+chem_prop_3$`Sample Location`[744] <- "DAF"
+
+chem_prop_3$`Alum Dose (mg/L)` <- as.numeric(chem_prop_3$`Alum Dose (mg/L)`)
+chem_prop_3$`Turbidity (benchtop)` <- as.numeric(chem_prop_3$`Turbidity (benchtop)`)
+
+ggplot(
+  data = chem_prop_3,
+  mapping = aes(x = `Turbidity (benchtop)` , y = `Alum Dose (mg/L)`, color = `Sample Location`)
+) +
+  geom_point()
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+filtered_data <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+filtered_data$`UVT (benchtop)` <- as.numeric(filtered_data$`UVT (benchtop)`)
+filtered_data$`Alum Dose (mg/L)` <- as.numeric(filtered_data$`Alum Dose (mg/L)`)
+
+ggplot(
+  data = filtered_data,
+  mapping = aes(x = `UVT (benchtop)`, y = factor(`Floc Time`), color = `Sample Location`)
+) +
+  geom_point()
+
+```
+
+
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+filtered_data <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+filtered_data$`UVT (benchtop)` <- as.numeric(filtered_data$`UVT (benchtop)`)
+filtered_data$`Alum Dose (mg/L)` <- as.numeric(filtered_data$`Alum Dose (mg/L)`)
+
+ggplot(
+  data = filtered_data,
+  mapping = aes(y = `Turbidity (benchtop)`, x = factor(`Floc Time`), color = `Sample Location`)
+) +
+  geom_point()
+
+```
+
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+
+chem_prop_3$`UVT (benchtop)` <- as.numeric(chem_prop_3$`UVT (benchtop)`)
+chem_prop_3$`Alum Dose (mg/L)` <- as.numeric(chem_prop_3$`Alum Dose (mg/L)`)
+
+ggplot(
+  data = filtered_data,
+  mapping = aes(y = `Turbidity (benchtop)`, x = `Floc Time` , color = `Sample Location`)
+) +
+  geom_point()
+
+```
+
+
+
+```{r}
+
+# Convert columns to numeric
+filtered_data0 <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+chem_prop_3$`Turbidity (benchtop)` <- as.numeric(chem_prop_3$`Turbidity (benchtop)`)
+filtered_data0$`Alum Dose (mg/L)` <- as.numeric(filtered_data0$`Alum Dose (mg/L)`)
+
+ggplot(data = filtered_data0, mapping = aes(x = `Alum Dose (mg/L)`, y = `Turbidity (benchtop)`,color = `Floc Time` )) +
+  geom_boxplot() +
+  facet_wrap(~`Alum Dose (mg/L)`, nrow = 1)
+
+
+```
+
+
+
+
+
+```{r}
+
+
+filtered_data01 <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+filtered_data01$Group <- cut(filtered_data01$`Alum Dose (mg/L)`, breaks = c(0, 40, 80, 120), labels = c("Low", "Medium", "High"))
+
+# Create the corrected boxplot using custom groups
+ggplot(data = filtered_data01, mapping = aes(x = Group, y = `Turbidity (benchtop)`, color = `Floc Time`)) +
+  geom_boxplot() +
+  geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+  labs(x = "Alum Dose Group (mg/l)", y = "Turbidity (benchtop)") +
+  scale_x_discrete(labels = c("Low" = "0-40", "Medium" = "40-80", "High" = "80-120"))
+
+```
+
+
+```{r}
+
+ggplot(
+  data = chem_prop_3,
+  mapping = aes(y = `Turbidity (benchtop)`, color = `Floc Time` , x = `Sample Location`)
+) +
+  geom_boxplot()
+
+```
+
+
+```{r}
+# Convert columns to numeric
+chem_prop_3$`Turbidity (benchtop)` <- as.numeric(chem_prop_3$`Turbidity (benchtop)`)
+
+# Create the boxplot with additional aesthetics
+ggplot(data = chem_prop_3, mapping = aes(y = `Turbidity (benchtop)`, color = `Floc Time`, x = `Sample Location`)) +
+  geom_boxplot(width = 0.8, alpha = 0.7, outlier.shape = 1, outlier.size = 3) +
+  labs(x = "Sample Location", y = "Turbidity (benchtop)", color = "Floc Time") +
+  scale_color_discrete(name = "Floc Time") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+```{r}
+# Convert columns to numeric
+chem_prop_3$`Turbidity (benchtop)` <- as.numeric(chem_prop_3$`Turbidity (benchtop)`)
+
+# Define the order of x-axis categories
+location_order <- c("Raw", "Rapid Mix", "DAF", "F1", "F2")
+
+# Convert Sample Location to a factor with desired order
+chem_prop_3$`Sample Location` <- factor(chem_prop_3$`Sample Location`, levels = location_order)
+
+# Create the boxplot with additional aesthetics
+ggplot(data = chem_prop_3, mapping = aes(y = `Turbidity (benchtop)`, color = `Floc Time`, x = `Sample Location`)) +
+  geom_boxplot(width = 0.4, alpha = 1, outlier.shape = 1, outlier.size = 2) +
+  labs(x = "Sample Location", y = "Turbidity (benchtop)", color = "Floc Time") +
+  scale_color_discrete(name = "Floc Time") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+
+```{r}
+
+filtered_data02 <- chem_prop_3 %>%
+  filter(`Floc Time` %in% c("7 min", "14 min", "21 min"))
+
+
+filtered_data02$`UVT (benchtop)` <- as.numeric(filtered_data02$`UVT (benchtop)`)
+
+location_order <- c("Raw", "Rapid Mix", "DAF", "F1", "F2")
+
+filtered_data02$`Sample Location` <- factor(filtered_data02$`Sample Location`, levels = location_order)
+
+ggplot(data = filtered_data02, mapping = aes(y = `UVT (benchtop)`, color = `Floc Time`, x = `Sample Location`)) +
+  geom_boxplot(width = 0.4, alpha = 1, outlier.shape = 1, outlier.size = 2) +
+  labs(x = "Sample Location", y = "UVT (benchtop)", color = "Floc Time") +
+  scale_color_discrete(name = "Floc Time") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+
+
+
+
+
+
+
+
